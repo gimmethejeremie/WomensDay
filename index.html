@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Special Message For My Dear Puppy 💕</title>
+    
+    <!-- Google Fonts - Handwriting styles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Great+Vibes&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- ========================================
+         ROMANTIC SCROLL PROGRESS BAR
+         ========================================
+         Shows reading progress as user scrolls.
+    -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- ========================================
+         SECTION 1: ENVELOPE HERO
+         ======================================== -->
+    <section id="hero" class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Click to Open</h1>
+            
+            <!-- Envelope Component -->
+            <div class="envelope" id="envelope">
+                <div class="envelope-flap"></div>
+                <div class="envelope-body"></div>
+                <div class="letter">
+                    <div class="letter-content">
+                        <span class="heart">❤️</span>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="hero-hint">Click the envelope to reveal your surprise</p>
+        </div>
+    </section>
+
+    <!-- ========================================
+         FLOATING HEARTS BACKGROUND CANVAS
+         ========================================
+         Canvas for floating hearts animation.
+         Starts after envelope overlay disappears.
+    -->
+    <canvas id="heartsCanvas"></canvas>
+
+    <!-- ========================================
+         MAIN CONTENT WRAPPER (CINEMATIC REVEAL)
+         ========================================
+         All main content wrapped for cinematic
+         reveal effect after intro overlay.
+    -->
+    <div class="main-content cinematic-hidden">
+        <!-- ========================================
+             SECTION 2: MESSAGE WITH TYPING EFFECT
+             ======================================== -->
+        <section id="message" class="message-section">
+        <div class="message-container fade-in">
+            <div class="message-box">
+                <p id="typing-text" class="typing-message"></p>
+                <span class="cursor">|</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+         SECTION 3: PINTEREST STYLE PHOTO GALLERY
+         ======================================== -->
+    <section id="gallery" class="gallery-section">
+        <div class="section-header fade-in">
+            <h2>Your Beautiful Moments</h2>
+            <div class="decorative-line"></div>
+        </div>
+        
+        <div class="gallery" id="gallery-container">
+            <!-- 
+                ====================================
+                CUSTOMIZATION: GALLERY IMAGES
+                ====================================
+                Add or remove gallery items below.
+                Place your images in the "images" folder
+                and update the src attribute accordingly.
+                Each image will automatically get stagger
+                animation and lightbox functionality.
+            -->
+            <div class="gallery-item" data-index="0">
+                <img src="images/photo1.jpg" alt="Memory 1">
+            </div>
+            <div class="gallery-item" data-index="1">
+                <img src="images/photo2.jpg" alt="Memory 2">
+            </div>
+            <div class="gallery-item" data-index="2">
+                <img src="images/photo3.jpg" alt="Memory 3">
+            </div>
+            <div class="gallery-item" data-index="3">
+                <img src="images/photo4.jpg" alt="Memory 4">
+            </div>
+            <div class="gallery-item" data-index="4">
+                <img src="images/photo5.jpg" alt="Memory 5">
+            </div>
+            <div class="gallery-item" data-index="5">
+                <img src="images/photo6.jpg" alt="Memory 6">
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+         SECTION 4: DIGITAL LETTER
+         ======================================== -->
+    <section id="letter" class="letter-section">
+        <div class="letter-card fade-in">
+            <!-- 
+                ====================================
+                CUSTOMIZATION: DIGITAL LETTER TEXT
+                ====================================
+                Edit the content below to personalize
+                your digital letter message.
+            -->
+            <div class="letter-header">
+                <span class="letter-date">March 8, 2026</span>
+            </div>
+            
+            <p class="letter-greeting">Dear Puppy,</p>
+            
+            <div class="letter-body">
+                <p>
+                    As International Women's Day approaches, I find myself reflecting on the incredible woman you are and how profoundly you've enriched my life. March 8th is a day to celebrate the strength, grace, and achievements of women everywhere, but for me, it's an opportunity to honor you specifically - the one who lights up my world with your kindness, your laughter, and your unwavering spirit.
+                </p>
+                <p>
+                    From the moment we met, you've shown me what true partnership looks like. Your intelligence inspires me, your compassion touches everyone around you, and your resilience in the face of challenges reminds me daily of the power women hold. In a world that can sometimes feel chaotic, you are my calm, my joy, and my greatest adventure. Whether we're wandering the vibrant streets of Hanoi, sharing quiet evenings at home, or dreaming about our future together, every moment with you feels like a gift.
+                </p>
+                <p>
+                    Puppy, you deserve to be celebrated not just today, but every day. Thank you for being you - for your love, your support, and for making me a better person. I am endlessly grateful to have you by my side, and I look forward to creating more beautiful memories with you.
+                </p>
+            </div>
+            
+            <div class="letter-closing">
+                <p>With all my love,</p>
+                <p class="signature">Mr. J</p>
+            </div>
+        </div>
+    </section>
+
+        <!-- ========================================
+             FULLSCREEN LIGHTBOX VIEWER
+             ========================================
+             Cinematic lightbox with image navigation.
+             Controlled by keyboard and mouse.
+        -->
+        <div id="lightbox" class="lightbox">
+            <div class="lightbox-background" onclick="closeLightbox()"></div>
+            <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close">&times;</button>
+            <button class="lightbox-nav lightbox-prev" onclick="navigateLightbox(-1)" aria-label="Previous image">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+            <button class="lightbox-nav lightbox-next" onclick="navigateLightbox(1)" aria-label="Next image">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+            <div class="lightbox-content">
+                <img id="lightboxImage" class="lightbox-image" alt="Full size image">
+            </div>
+            <div class="lightbox-counter">
+                <span id="lightboxCounter"></span>
+            </div>
+            <!-- Slideshow Controls -->
+            <div class="lightbox-controls">
+                <button class="slideshow-btn" id="slideshowBtn" onclick="toggleSlideshow()" aria-label="Play slideshow">
+                    <svg id="playIcon" class="control-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    <svg id="pauseIcon" class="control-icon" style="display: none;" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <rect x="6" y="4" width="4" height="16"></rect>
+                        <rect x="14" y="4" width="4" height="16"></rect>
+                    </svg>
+                </button>
+                <span class="slideshow-label" id="slideshowLabel">Slideshow</span>
+            </div>
+        </div>
+    </div> <!-- End .main-content -->
+
+    <!-- ========================================
+         AUDIO: BACKGROUND MUSIC
+         ======================================== 
+         CUSTOMIZATION: Replace "music/song.mp3" with 
+         your own audio file path.
+    -->
+    <audio id="bgMusic" loop>
+        <source src="music/song.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script src="script.js"></script>
+</body>
+</html>

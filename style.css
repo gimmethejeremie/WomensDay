@@ -1,0 +1,854 @@
+/* ========================================
+   ROMANTIC GREETING CARD WEBSITE STYLES
+   ======================================== */
+
+/* ========================================
+   CSS RESET & BASE STYLES
+   ======================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    /* 
+        ====================================
+        CUSTOMIZATION: BACKGROUND GRADIENT
+        ====================================
+        Change #ffd6e7 (baby pink) to your 
+        preferred color for the gradient.
+    */
+    background: linear-gradient(45deg, #ffd6e7, #ffffff);
+    background-attachment: fixed;
+    min-height: 100vh;
+    overflow-x: hidden;
+    color: #5a4a5a;
+}
+
+/* ========================================
+   ROMANTIC SCROLL PROGRESS BAR
+   ========================================
+   Shows reading progress as user scrolls.
+*/
+.progress-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    z-index: 9998;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #ff8fb1, #ffc2d1);
+    transition: width 0.15s ease-out;
+    box-shadow: 
+        0 0 10px rgba(255, 143, 177, 0.5),
+        0 0 20px rgba(255, 194, 209, 0.3);
+}
+
+/* ========================================
+   SECTION 1: ENVELOPE HERO (INTRO OVERLAY)
+   ======================================== */
+/* 
+    The hero section acts as a full-screen overlay
+    that sits above the rest of the page content.
+    When the envelope is clicked, it slides upward
+    and disappears, revealing the content behind.
+*/
+.hero-section {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    z-index: 9999;
+    background: linear-gradient(45deg, #ffd6e7, #ffffff);
+}
+
+/* Overlay closing animation */
+.hero-section.closing {
+    animation: overlayExit 0.8s ease-in-out forwards;
+}
+
+.hero-section.hidden {
+    display: none;
+}
+
+.hero-content {
+    text-align: center;
+}
+
+/* ========================================
+   FLOATING HEARTS CANVAS
+   ======================================== */
+#heartsCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* ========================================
+   CINEMATIC REVEAL EFFECT
+   ========================================
+   Main content starts slightly blurred,
+   zoomed, and transparent. When the envelope
+   is clicked, it smoothly transitions to
+   normal state with a camera-focus effect.
+*/
+.main-content {
+    position: relative;
+    z-index: 10;
+    transition: transform 1.2s ease-out, 
+                filter 1.2s ease-out, 
+                opacity 1.2s ease-out;
+}
+
+/* Initial hidden state before envelope is opened */
+.main-content.cinematic-hidden {
+    transform: scale(1.08);
+    filter: blur(12px);
+    opacity: 0.7;
+}
+
+/* Final visible state after envelope opens */
+.main-content.cinematic-visible {
+    transform: scale(1);
+    filter: blur(0);
+    opacity: 1;
+}
+
+.hero-title {
+    font-family: 'Dancing Script', cursive;
+    font-size: 3rem;
+    color: #d4658a;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeInDown 1s ease forwards;
+}
+
+.hero-hint {
+    font-size: 0.9rem;
+    color: #a88a9a;
+    margin-top: 30px;
+    opacity: 0;
+    animation: fadeInUp 1s ease 0.5s forwards;
+}
+
+/* Envelope Component */
+.envelope {
+    position: relative;
+    width: 280px;
+    height: 180px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    margin: 0 auto;
+}
+
+.envelope:hover {
+    transform: scale(1.05);
+}
+
+.envelope-body {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #fff5f8, #ffe4ec);
+    border-radius: 10px;
+    box-shadow: 
+        0 15px 35px rgba(214, 100, 140, 0.2),
+        0 5px 15px rgba(0, 0, 0, 0.1);
+    border: 2px solid #f8d7e3;
+}
+
+.envelope-flap {
+    position: absolute;
+    width: 100%;
+    height: 100px;
+    background: linear-gradient(135deg, #ffe8f0, #ffd6e7);
+    clip-path: polygon(0 0, 50% 70%, 100% 0);
+    transform-origin: top center;
+    transition: transform 0.8s ease;
+    z-index: 10;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.envelope.opened .envelope-flap {
+    transform: rotateX(180deg);
+}
+
+.letter {
+    position: absolute;
+    top: 30px;
+    left: 10%;
+    width: 80%;
+    height: 140px;
+    background: white;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.8s ease 0.2s;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 5;
+}
+
+.envelope.opened .letter {
+    transform: translateY(-60px);
+}
+
+.letter-content {
+    text-align: center;
+}
+
+.letter-content .heart {
+    font-size: 2.5rem;
+    animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+/* ========================================
+   SECTION 2: MESSAGE WITH TYPING EFFECT
+   ======================================== */
+.message-section {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.message-container {
+    max-width: 800px;
+    width: 100%;
+}
+
+.message-box {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 50px 40px;
+    border-radius: 20px;
+    box-shadow: 
+        0 20px 60px rgba(214, 100, 140, 0.15),
+        0 5px 20px rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(10px);
+    position: relative;
+}
+
+.typing-message {
+    font-family: 'Dancing Script', cursive;
+    font-size: 2rem;
+    color: #d4658a;
+    line-height: 1.8;
+    display: inline;
+}
+
+.cursor {
+    display: inline-block;
+    font-weight: bold;
+    color: #d4658a;
+    animation: blink 0.7s infinite;
+    margin-left: 2px;
+}
+
+/* ========================================
+   SECTION 3: PINTEREST STYLE GALLERY (CINEMATIC)
+   ========================================
+   CUSTOMIZATION:
+   - column-count: Change number of columns (default: 3)
+   - column-gap: Adjust spacing between columns
+   - Animation delay: Adjust stagger timing in JavaScript
+*/
+.gallery-section {
+    padding: 80px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.section-header h2 {
+    font-family: 'Dancing Script', cursive;
+    font-size: 2.8rem;
+    color: #d4658a;
+    margin-bottom: 15px;
+}
+
+.decorative-line {
+    width: 100px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #d4658a, transparent);
+    margin: 0 auto;
+}
+
+.gallery {
+    column-count: 3;
+    column-gap: 16px;
+}
+
+.gallery-item {
+    break-inside: avoid;
+    margin-bottom: 16px;
+    border-radius: 15px;
+    overflow: hidden;
+    position: relative;
+    /* Initial state for stagger animation */
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+/* Visible state after stagger animation triggers */
+.gallery-item.reveal {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 15px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    /* Placeholder background for missing images */
+    background: linear-gradient(135deg, #ffe4ec, #ffd6e7);
+    min-height: 200px;
+    box-shadow: 0 5px 15px rgba(214, 100, 140, 0.15);
+}
+
+.gallery-item img:hover {
+    transform: scale(1.03);
+    box-shadow: 0 15px 40px rgba(214, 100, 140, 0.3);
+}
+
+/* ========================================
+   SPARKLE HOVER EFFECT
+   ======================================== */
+.sparkle {
+    position: absolute;
+    pointer-events: none;
+    border-radius: 50%;
+    animation: sparkleAnimation 0.7s ease-out forwards;
+}
+
+@keyframes sparkleAnimation {
+    0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1) rotate(180deg);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(0.5) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* ========================================
+   SECTION 4: DIGITAL LETTER
+   ======================================== */
+.letter-section {
+    padding: 80px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.letter-card {
+    max-width: 700px;
+    width: 100%;
+    padding: 50px 40px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 
+        0 25px 80px rgba(214, 100, 140, 0.15),
+        0 10px 30px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.letter-card::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+    border: 1px solid #fde4ec;
+    border-radius: 15px;
+    pointer-events: none;
+}
+
+.letter-header {
+    text-align: right;
+    margin-bottom: 30px;
+}
+
+.letter-date {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.2rem;
+    color: #c9a0ad;
+}
+
+.letter-greeting {
+    font-family: 'Great Vibes', cursive;
+    font-size: 2.5rem;
+    color: #d4658a;
+    margin-bottom: 30px;
+}
+
+.letter-body {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.4rem;
+    line-height: 2;
+    color: #6a5a6a;
+}
+
+.letter-body p {
+    margin-bottom: 20px;
+    text-indent: 30px;
+}
+
+.letter-closing {
+    margin-top: 40px;
+    text-align: right;
+    font-family: 'Great Vibes', cursive;
+    font-size: 1.5rem;
+    color: #d4658a;
+}
+
+.signature {
+    font-size: 2rem;
+    margin-top: 10px;
+}
+
+/* ========================================
+   FULLSCREEN LIGHTBOX VIEWER
+   ========================================
+   Cinematic lightbox with navigation controls.
+   Features:
+   - Image navigation (prev/next)
+   - Keyboard support (arrows, ESC)
+   - Smooth zoom animation
+   - Counter display
+*/
+.lightbox {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.lightbox.active {
+    display: block;
+}
+
+.lightbox-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    animation: fadeIn 0.3s ease;
+}
+
+.lightbox-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 90%;
+    max-height: 90%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lightbox-image {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 25px 100px rgba(0, 0, 0, 0.5);
+    animation: lightboxZoomIn 0.4s ease-out;
+}
+
+@keyframes lightboxZoomIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Close Button */
+.lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 35px;
+    color: white;
+    font-size: 50px;
+    font-weight: 300;
+    cursor: pointer;
+    background: none;
+    border: none;
+    transition: color 0.3s ease, transform 0.3s ease;
+    z-index: 10001;
+    line-height: 1;
+    padding: 0;
+    width: 50px;
+    height: 50px;
+}
+
+.lightbox-close:hover {
+    color: #d4658a;
+    transform: rotate(90deg);
+}
+
+/* Navigation Buttons */
+.lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: 30px;
+    padding: 15px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    z-index: 10001;
+}
+
+.lightbox-nav:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #d4658a;
+    color: #d4658a;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.lightbox-prev {
+    left: 30px;
+}
+
+.lightbox-next {
+    right: 30px;
+}
+
+/* Counter */
+.lightbox-counter {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 16px;
+    font-family: 'Poppins', sans-serif;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px 20px;
+    border-radius: 25px;
+    backdrop-filter: blur(10px);
+    z-index: 10001;
+}
+
+/* Slideshow Controls */
+.lightbox-controls {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 10001;
+}
+
+.slideshow-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.slideshow-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #d4658a;
+    color: #d4658a;
+    transform: scale(1.1);
+}
+
+.slideshow-btn.active {
+    background: rgba(212, 101, 138, 0.3);
+    border-color: #d4658a;
+    color: #d4658a;
+}
+
+.control-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.slideshow-label {
+    color: white;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Lightbox image crossfade for slideshow */
+.lightbox-image.crossfade {
+    animation: crossfadeAnimation 0.4s ease-in-out;
+}
+
+@keyframes crossfadeAnimation {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* ========================================
+   FADE-IN ANIMATION (IntersectionObserver)
+   ======================================== */
+.fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ========================================
+   KEYFRAME ANIMATIONS
+   ======================================== */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    25% { transform: scale(1.1); }
+    50% { transform: scale(1); }
+    75% { transform: scale(1.15); }
+}
+
+/* Overlay Exit Animation */
+@keyframes overlayExit {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100vh);
+        opacity: 0;
+    }
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+/* Tablet: 2 columns */
+@media (max-width: 992px) {
+    .gallery {
+        column-count: 2;
+    }
+    
+    .lightbox-nav {
+        padding: 12px 16px;
+    }
+    
+    .lightbox-prev {
+        left: 20px;
+    }
+    
+    .lightbox-next {
+        right: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.2rem;
+    }
+    
+    .envelope {
+        width: 240px;
+        height: 160px;
+    }
+    
+    .envelope-flap {
+        height: 85px;
+    }
+    
+    .letter {
+        height: 120px;
+    }
+    
+    .typing-message {
+        font-size: 1.5rem;
+    }
+    
+    .message-box {
+        padding: 35px 25px;
+    }
+    
+    .section-header h2 {
+        font-size: 2.2rem;
+    }
+    
+    .letter-card {
+        padding: 35px 25px;
+    }
+    
+    .letter-greeting {
+        font-size: 2rem;
+    }
+    
+    .letter-body {
+        font-size: 1.2rem;
+    }
+    
+    .lightbox-close {
+        top: 15px;
+        right: 15px;
+        font-size: 40px;
+    }
+    
+    .lightbox-controls {
+        bottom: 20px;
+        right: 20px;
+    }
+    
+    .lightbox-counter {
+        bottom: 20px;
+        font-size: 14px;
+        padding: 8px 16px;
+    }
+}
+
+/* Mobile: 1 column */
+@media (max-width: 576px) {
+    .gallery {
+        column-count: 1;
+    }
+    
+    .hero-title {
+        font-size: 1.8rem;
+    }
+    
+    .envelope {
+        width: 200px;
+        height: 140px;
+    }
+    
+    .envelope-flap {
+        height: 75px;
+    }
+    
+    .letter {
+        height: 100px;
+        top: 25px;
+    }
+    
+    .typing-message {
+        font-size: 1.3rem;
+    }
+    
+    .letter-greeting {
+        font-size: 1.8rem;
+    }
+    
+    .letter-body {
+        font-size: 1.1rem;
+    }
+    
+    .letter-closing {
+        font-size: 1.3rem;
+    }
+    
+    .signature {
+        font-size: 1.6rem;
+    }
+}
