@@ -130,8 +130,8 @@ body {
 
 /* Final visible state after envelope opens */
 .main-content.cinematic-visible {
-    transform: scale(1);
-    filter: blur(0);
+    transform: none;
+    filter: none;
     opacity: 1;
 }
 
@@ -480,20 +480,22 @@ body {
 
 .lightbox-content {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    max-width: 90%;
-    max-height: 90%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 30px 70px;
+    pointer-events: none;
 }
 
 .lightbox-image {
-    max-width: 100%;
-    max-height: 90vh;
+    width: auto;
+    height: auto;
+    max-width: min(92vw, 1600px);
+    max-height: calc(100vh - 120px);
     object-fit: contain;
+    object-position: center center;
+    margin: auto;
+    pointer-events: auto;
     border-radius: 10px;
     box-shadow: 0 25px 100px rgba(0, 0, 0, 0.5);
     animation: lightboxZoomIn 0.4s ease-out;
