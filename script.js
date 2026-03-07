@@ -33,6 +33,7 @@ const typingTextElement = document.getElementById('typing-text');
 const lightbox = document.getElementById('lightbox');
 const lightboxImage = document.getElementById('lightboxImage');
 const lightboxCounter = document.getElementById('lightboxCounter');
+const lightboxDescription = document.getElementById('lightboxDescription');
 const galleryItems = document.querySelectorAll('.gallery-item');
 const galleryImages = document.querySelectorAll('.gallery-item img');
 const progressBar = document.getElementById('progressBar');
@@ -40,6 +41,99 @@ const slideshowBtn = document.getElementById('slideshowBtn');
 const playIcon = document.getElementById('playIcon');
 const pauseIcon = document.getElementById('pauseIcon');
 const slideshowLabel = document.getElementById('slideshowLabel');
+const themeToggle = document.getElementById('themeToggle');
+const themeToggleIcon = document.getElementById('themeToggleIcon');
+const themeToggleLabel = document.getElementById('themeToggleLabel');
+const themeFadeOverlay = document.getElementById('themeFadeOverlay');
+
+/* ========================================
+   LIGHT / DARK THEME TOGGLE
+   ======================================== */
+const THEME_STORAGE_KEY = 'womens-day-theme';
+const THEME_TRANSITION_MS = 800;
+let isThemeTransitioning = false;
+
+// Check if View Transitions API is supported
+const supportsViewTransitions = 'startViewTransition' in document;
+
+function getThemeBackground(theme) {
+    if (theme === 'dark') {
+        return 'linear-gradient(45deg, #1b1423, #2d2238)';
+    }
+    return 'linear-gradient(45deg, #ffd6e7, #ffffff)';
+}
+
+function applyTheme(theme) {
+    const isDark = theme === 'dark';
+    document.body.classList.toggle('theme-dark', isDark);
+
+    if (themeToggle) {
+        themeToggle.setAttribute('aria-pressed', String(isDark));
+    }
+
+    if (themeToggleIcon) {
+        themeToggleIcon.textContent = isDark ? '☀️' : '🌙';
+    }
+
+    if (themeToggleLabel) {
+        themeToggleLabel.textContent = isDark ? 'Light' : 'Dark';
+    }
+}
+
+function toggleThemeWithTransition() {
+    if (isThemeTransitioning) return;
+
+    const nextTheme = document.body.classList.contains('theme-dark') ? 'light' : 'dark';
+    const currentTheme = document.body.classList.contains('theme-dark') ? 'dark' : 'light';
+    isThemeTransitioning = true;
+
+    // Modern approach: Use View Transitions API
+    if (supportsViewTransitions) {
+        document.documentElement.classList.add('theme-transitioning');
+        
+        const transition = document.startViewTransition(() => {
+            applyTheme(nextTheme);
+        });
+
+        transition.finished.finally(() => {
+            document.documentElement.classList.remove('theme-transitioning');
+            isThemeTransitioning = false;
+        });
+    }
+    // Fallback: Use clip-path animation overlay
+    else if (themeFadeOverlay) {
+        themeFadeOverlay.style.background = getThemeBackground(currentTheme);
+        themeFadeOverlay.classList.remove('active');
+        void themeFadeOverlay.offsetWidth;
+        themeFadeOverlay.classList.add('active');
+
+        applyTheme(nextTheme);
+
+        setTimeout(() => {
+            themeFadeOverlay.classList.remove('active');
+            isThemeTransitioning = false;
+        }, THEME_TRANSITION_MS);
+    }
+    // Simple fallback: Instant switch
+    else {
+        applyTheme(nextTheme);
+        isThemeTransitioning = false;
+    }
+
+    localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+}
+
+function initThemeToggle() {
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+
+    applyTheme(initialTheme);
+
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleThemeWithTransition);
+    }
+}
 
 /* ========================================
    ENVELOPE CLICK HANDLER (OVERLAY REMOVAL)
@@ -88,9 +182,17 @@ envelope.addEventListener('click', function() {
         }
         
         // After overlay animation completes (0.8s),
-        // hide the overlay completely
+        // hide the overlay and scroll to next section
         setTimeout(() => {
             heroSection.classList.add('hidden');
+            
+            // Smooth scroll to message section with delay for better UX
+            setTimeout(() => {
+                const messageSection = document.getElementById('message');
+                if (messageSection) {
+                    messageSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 300);
         }, 800);
     }, 800);
 });
@@ -145,7 +247,7 @@ const totalImages = galleryImages.length;
 // STAGGER REVEAL ANIMATION
 // ====================================
 // CUSTOMIZATION: Adjust stagger delay here
-const STAGGER_DELAY = 80; // milliseconds between each item
+const STAGGER_DELAY = 200; // milliseconds between each item
 
 // Intersection Observer for gallery stagger animation
 const galleryObserver = new IntersectionObserver((entries) => {
@@ -218,6 +320,11 @@ function updateLightboxImage() {
     lightboxImage.src = currentImage.src;
     lightboxImage.alt = currentImage.alt;
     lightboxCounter.textContent = `${currentLightboxIndex + 1} / ${totalImages}`;
+
+    if (lightboxDescription) {
+        const description = currentImage.dataset.description || currentImage.alt || '';
+        lightboxDescription.textContent = description;
+    }
 }
 
 // Keyboard navigation for lightbox
@@ -374,11 +481,17 @@ function createSparkles(container) {
 }
 
 /* ========================================
-   INTERSECTION OBSERVER FOR FADE-IN ANIMATIONS
-   ======================================== */
-const fadeInElements = document.querySelectorAll('.fade-in');
+   INTERSECTION OBSERVER FOR REVEAL ANIMATIONS
+   ========================================
+   Supports multiple animation types:
+   - .fade-in: default fade + slide up
+   - .reveal-text: text fade + slide up
+   - .reveal-slide-left: images slide from left
+   - .reveal-drop: highlights drop from top
+*/
 
-const fadeInObserver = new IntersectionObserver((entries, observer) => {
+// Create a unified observer for all reveal animation types
+const revealObserver = new IntersectionObserver((entries, observer) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
             entry.target.classList.add('visible');
@@ -395,13 +508,14 @@ const fadeInObserver = new IntersectionObserver((entries, observer) => {
         }
     });
 }, {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
+    threshold: 0.2,
+    rootMargin: '0px 0px -100px 0px'
 });
 
-// Observe all fade-in elements
-fadeInElements.forEach(element => {
-    fadeInObserver.observe(element);
+// Observe all elements with reveal animation classes
+const revealElements = document.querySelectorAll('.fade-in, .reveal-text, .reveal-slide-left, .reveal-drop, .reveal-delayed, .reveal-letter-content, .reveal-stage-2, .reveal-stage-3');
+revealElements.forEach(element => {
+    revealObserver.observe(element);
 });
 
 /* ========================================
@@ -444,6 +558,9 @@ if (!('scrollBehavior' in document.documentElement.style)) {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('💕 Romantic Greeting Card Website Loaded');
     console.log('Click the envelope to begin the experience!');
+
+    // Initialize light/dark theme based on user preference
+    initThemeToggle();
     
     // Initialize scroll progress bar
     updateScrollProgress();

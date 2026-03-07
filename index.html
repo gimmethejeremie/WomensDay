@@ -25,6 +25,13 @@
         <div class="progress-bar" id="progressBar"></div>
     </div>
 
+    <div id="themeFadeOverlay" class="theme-fade-overlay" aria-hidden="true"></div>
+
+    <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle light and dark theme" aria-pressed="false">
+        <span id="themeToggleIcon" aria-hidden="true">🌙</span>
+        <span id="themeToggleLabel">Dark</span>
+    </button>
+
     <!-- ========================================
          SECTION 1: ENVELOPE HERO
          ======================================== -->
@@ -66,19 +73,19 @@
              SECTION 2: MESSAGE WITH TYPING EFFECT
              ======================================== -->
         <section id="message" class="message-section">
-        <div class="message-container fade-in">
-            <div class="message-box">
-                <p id="typing-text" class="typing-message"></p>
-                <span class="cursor">|</span>
+            <div class="message-container reveal-text">
+                <div class="message-box">
+                    <p id="typing-text" class="typing-message"></p>
+                    <span class="cursor">|</span>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- ========================================
-         SECTION 3: PINTEREST STYLE PHOTO GALLERY
-         ======================================== -->
-    <section id="gallery" class="gallery-section">
-        <div class="section-header fade-in">
+        <!-- ========================================
+             SECTION 3: PINTEREST STYLE PHOTO GALLERY
+             ======================================== -->
+        <section id="gallery" class="gallery-section">
+        <div class="section-header reveal-drop">
             <h2>Your Beautiful Moments</h2>
             <div class="decorative-line"></div>
         </div>
@@ -95,28 +102,54 @@
                 animation and lightbox functionality.
             -->
             <div class="gallery-item" data-index="0">
-                <img src="images/photo1.jpg" alt="Memory 1">
+                <img src="images/photo1.jpg" alt="Memory 1" data-description="This is the way you make me smile.">
             </div>
             <div class="gallery-item" data-index="1">
-                <img src="images/photo2.jpg" alt="Memory 2">
+                <img src="images/photo2.jpg" alt="Memory 2" data-description="In a soft and gentle way, my heart skips a beat whenever I see you.">
             </div>
             <div class="gallery-item" data-index="2">
-                <img src="images/photo3.jpg" alt="Memory 3">
+                <img src="images/photo3.jpg" alt="Memory 3" data-description="Every moment with you is a treasure I hold dear.">
             </div>
             <div class="gallery-item" data-index="3">
-                <img src="images/photo4.jpg" alt="Memory 4">
+                <img src="images/photo4.jpg" alt="Memory 4" data-description="The Sun shines brightest when you're around.">
             </div>
             <div class="gallery-item" data-index="4">
-                <img src="images/photo5.jpg" alt="Memory 5">
+                <img src="images/photo5.jpg" alt="Memory 5" data-description="Thank you for making ordinary moments extraordinary.">
             </div>
             <div class="gallery-item" data-index="5">
-                <img src="images/photo6.jpg" alt="Memory 6">
+                <img src="images/photo6.jpg" alt="Memory 6" data-description="And I will always keep all these moments just for us.">
             </div>
         </div>
     </section>
 
     <!-- ========================================
-         SECTION 4: DIGITAL LETTER
+         SECTION 4: DEAR PUPPY STANDALONE
+         ======================================== -->
+    <section id="dear-puppy" class="dear-puppy-section">
+        <!-- Stage 1: Dear Puppy.... -->
+        <div class="dear-puppy-stage reveal-text">
+            <h1 class="dear-puppy-title">Dear Puppy....</h1>
+        </div>
+        
+        <!-- Spacer 1 -->
+        <div class="dear-puppy-spacer"></div>
+        
+        <!-- Stage 2: I have something to tell you... -->
+        <div class="dear-puppy-stage reveal-stage-2">
+            <h2 class="dear-puppy-subtitle">I have something to tell you...</h2>
+        </div>
+        
+        <!-- Spacer 2 -->
+        <div class="dear-puppy-spacer"></div>
+        
+        <!-- Stage 3: From the bottom of my heart -->
+        <div class="dear-puppy-stage reveal-stage-3">
+            <h2 class="dear-puppy-subtitle">From the very bottom of my heart.</h2>
+        </div>
+    </section>
+
+    <!-- ========================================
+         SECTION 5: DIGITAL LETTER
          ======================================== -->
     <section id="letter" class="letter-section">
         <div class="letter-card fade-in">
@@ -133,7 +166,7 @@
             
             <p class="letter-greeting">Dear Puppy,</p>
             
-            <div class="letter-body">
+            <div class="letter-body reveal-letter-content">
                 <p>
                     As International Women's Day approaches, I find myself reflecting on the incredible woman you are and how profoundly you've enriched my life. March 8th is a day to celebrate the strength, grace, and achievements of women everywhere, but for me, it's an opportunity to honor you specifically - the one who lights up my world with your kindness, your laughter, and your unwavering spirit.
                 </p>
@@ -145,7 +178,7 @@
                 </p>
             </div>
             
-            <div class="letter-closing">
+            <div class="letter-closing reveal-letter-content">
                 <p>With all my love,</p>
                 <p class="signature">Mr. J</p>
             </div>
@@ -177,6 +210,7 @@
             <div class="lightbox-counter">
                 <span id="lightboxCounter"></span>
             </div>
+            <div class="lightbox-description" id="lightboxDescription"></div>
             <!-- Slideshow Controls -->
             <div class="lightbox-controls">
                 <button class="slideshow-btn" id="slideshowBtn" onclick="toggleSlideshow()" aria-label="Play slideshow">
