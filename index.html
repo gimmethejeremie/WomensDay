@@ -81,6 +81,24 @@
             </div>
         </section>
 
+        <section id="memory-intro" class="memory-intro-section">
+            <div class="memory-intro-stage reveal-text">
+                <h2 class="memory-intro-title">Before today,</h2>
+            </div>
+
+            <div class="memory-intro-spacer"></div>
+
+            <div class="memory-intro-stage reveal-stage-2">
+                <h3 class="memory-intro-subtitle">there are some moments</h3>
+            </div>
+
+            <div class="memory-intro-spacer"></div>
+
+            <div class="memory-intro-stage reveal-stage-3">
+                <h3 class="memory-intro-subtitle">I will never forget.</h3>
+            </div>
+        </section>
+
         <!-- ========================================
              SECTION 3: PINTEREST STYLE PHOTO GALLERY
              ======================================== -->
@@ -185,6 +203,37 @@
         </div>
     </section>
 
+    <section id="reminder" class="reminder-section">
+        <div class="reminder-wrap">
+            <h2 class="reminder-lead reveal-text">One more thing</h2>
+            <p class="reminder-sub reveal-stage-2">I want you to remember</p>
+            <div class="reminder-lines">
+                <p class="reveal-line">You are strong</p>
+                <p class="reveal-line">You are kind</p>
+                <p class="reveal-line">You are amazing</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="finalQuestion" class="final-question-section">
+        <div class="final-question-wrap reveal-text" id="finalQuestionWrap">
+            <button id="openQuestionFlow" class="final-trigger-btn" type="button">
+                So, how do you feel about this present?
+            </button>
+            <div id="finalThanks" class="final-thanks" aria-live="polite"></div>
+        </div>
+
+        <div id="choiceLayer" class="choice-layer" aria-hidden="true">
+            <div class="choice-panel">
+                <p id="choiceQuestionText" class="choice-question">So, how do you feel about this present?</p>
+                <div class="choice-actions">
+                    <button id="yesChoice" class="choice-btn choice-yes" type="button">Like it!!</button>
+                    <button id="noChoice" class="choice-btn choice-no" type="button">Sucks!</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
         <!-- ========================================
              FULLSCREEN LIGHTBOX VIEWER
              ========================================
@@ -236,6 +285,16 @@
     <audio id="bgMusic" loop>
         <source src="music/song.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
+    </audio>
+    
+    <!-- ========================================
+         AUDIO: PAGE FLIP SOUND FOR THEME TOGGLE
+         ======================================== 
+         CUSTOMIZATION: Add "music/page-flip.mp3" file
+         to enable page flip sound when toggling theme.
+    -->
+    <audio id="pageFlipSound" preload="auto">
+        <source src="music/page-flip.mp3" type="audio/mpeg">
     </audio>
 
     <script src="script.js"></script>

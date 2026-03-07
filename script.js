@@ -45,6 +45,12 @@ const themeToggle = document.getElementById('themeToggle');
 const themeToggleIcon = document.getElementById('themeToggleIcon');
 const themeToggleLabel = document.getElementById('themeToggleLabel');
 const themeFadeOverlay = document.getElementById('themeFadeOverlay');
+const openQuestionFlowBtn = document.getElementById('openQuestionFlow');
+const choiceLayer = document.getElementById('choiceLayer');
+const choiceQuestionText = document.getElementById('choiceQuestionText');
+const yesChoiceBtn = document.getElementById('yesChoice');
+const noChoiceBtn = document.getElementById('noChoice');
+const finalThanks = document.getElementById('finalThanks');
 
 /* ========================================
    LIGHT / DARK THEME TOGGLE
@@ -86,6 +92,14 @@ function toggleThemeWithTransition() {
     const nextTheme = document.body.classList.contains('theme-dark') ? 'light' : 'dark';
     const currentTheme = document.body.classList.contains('theme-dark') ? 'dark' : 'light';
     isThemeTransitioning = true;
+    
+    // Play page flip sound if available
+    const pageFlipSound = document.getElementById('pageFlipSound');
+    if (pageFlipSound) {
+        pageFlipSound.currentTime = 0;
+        pageFlipSound.volume = 0.3;
+        pageFlipSound.play().catch(err => console.log('Sound play failed:', err));
+    }
 
     // Modern approach: Use View Transitions API
     if (supportsViewTransitions) {
@@ -151,6 +165,9 @@ function initThemeToggle() {
 let envelopeOpened = false;
 let typingStarted = false;
 
+// Detect if device is mobile
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+
 envelope.addEventListener('click', function() {
     if (envelopeOpened) return;
     
@@ -204,8 +221,7 @@ function playBackgroundMusic() {
     if (bgMusic) {
         bgMusic.volume = 0.5; // Set volume to 50%
         bgMusic.play().catch(error => {
-            // Handle autoplay restrictions
-            console.log('Audio playback requires user interaction:', error);
+            // Silently handle autoplay restrictions
         });
     }
 }
@@ -242,6 +258,7 @@ function typeCharacter() {
 
 let currentLightboxIndex = 0;
 const totalImages = galleryImages.length;
+let isMorphingLightbox = false;
 
 // ====================================
 // STAGGER REVEAL ANIMATION
@@ -294,25 +311,57 @@ function openLightbox(index) {
     currentLightboxIndex = index;
     updateLightboxImage();
     lightbox.classList.add('active');
+    document.body.classList.add('lightbox-open');
     document.body.style.overflow = 'hidden';
 }
 
 function closeLightbox() {
     lightbox.classList.remove('active');
+    document.body.classList.remove('lightbox-open');
     document.body.style.overflow = '';
 }
 
 function navigateLightbox(direction) {
-    currentLightboxIndex += direction;
-    
-    // Wrap around
-    if (currentLightboxIndex < 0) {
-        currentLightboxIndex = totalImages - 1;
-    } else if (currentLightboxIndex >= totalImages) {
-        currentLightboxIndex = 0;
+    if (!lightbox || !lightbox.classList.contains('active')) return;
+    if (isMorphingLightbox) return;
+
+    const nextIndex = getWrappedIndex(currentLightboxIndex + direction);
+    morphToLightboxImage(nextIndex);
+}
+
+function getWrappedIndex(index) {
+    if (index < 0) {
+        return totalImages - 1;
     }
-    
-    updateLightboxImage();
+    if (index >= totalImages) {
+        return 0;
+    }
+    return index;
+}
+
+function morphToLightboxImage(nextIndex) {
+    if (!lightboxImage) {
+        currentLightboxIndex = nextIndex;
+        updateLightboxImage();
+        return;
+    }
+
+    isMorphingLightbox = true;
+    lightboxImage.classList.remove('morph-in', 'morph-out');
+    lightboxImage.classList.add('morph-out');
+
+    setTimeout(() => {
+        currentLightboxIndex = nextIndex;
+        updateLightboxImage();
+
+        lightboxImage.classList.remove('morph-out');
+        lightboxImage.classList.add('morph-in');
+
+        setTimeout(() => {
+            lightboxImage.classList.remove('morph-in');
+            isMorphingLightbox = false;
+        }, 340);
+    }, 220);
 }
 
 function updateLightboxImage() {
@@ -375,13 +424,8 @@ function startSlideshow() {
     if (slideshowTimer) clearInterval(slideshowTimer);
     
     slideshowTimer = setInterval(() => {
-        // Add crossfade animation
-        lightboxImage.classList.add('crossfade');
-        setTimeout(() => {
-            lightboxImage.classList.remove('crossfade');
-        }, 400);
-        
-        navigateLightbox(1);
+        const nextIndex = getWrappedIndex(currentLightboxIndex + 1);
+        morphToLightboxImage(nextIndex);
     }, SLIDESHOW_INTERVAL);
 }
 
@@ -481,6 +525,289 @@ function createSparkles(container) {
 }
 
 /* ========================================
+   FINAL INTERACTION FLOW
+   ======================================== */
+const interactionQuestions = [
+    'So, how do you feel about this present?',
+    'Do you love me?'
+];
+
+const interactionAnswers = [
+    { yes: 'Like it!!', no: 'Sucks!' },
+    { yes: 'Yessss', no: 'Not at all' }
+];
+
+let currentQuestionStep = 0;
+let noClicksForCurrentStep = 0;
+let noButtonOffsetX = 0;
+let noButtonOffsetY = 0;
+let lastNoEvadeTs = 0;
+
+function getChoicePanelElement() {
+    if (!choiceLayer) return null;
+    return choiceLayer.querySelector('.choice-panel');
+}
+
+function evadeNoButton() {
+    if (!noChoiceBtn || noClicksForCurrentStep >= 5 || noChoiceBtn.classList.contains('hidden')) {
+        return;
+    }
+
+    const now = Date.now();
+    if (now - lastNoEvadeTs < 120) {
+        return;
+    }
+    lastNoEvadeTs = now;
+
+    const panel = getChoicePanelElement();
+    const panelRect = panel ? panel.getBoundingClientRect() : null;
+    const btnRect = noChoiceBtn.getBoundingClientRect();
+
+    const maxX = panelRect
+        ? Math.max((panelRect.width - btnRect.width) / 2 - 18, 26)
+        : 120;
+    const maxY = panelRect
+        ? Math.max((panelRect.height - btnRect.height) / 3 - 14, 18)
+        : 50;
+
+    noButtonOffsetX = (Math.random() * 2 - 1) * maxX;
+    noButtonOffsetY = (Math.random() * 2 - 1) * maxY;
+
+    applyChoiceButtonScale();
+}
+
+function applyChoiceButtonScale() {
+    if (!yesChoiceBtn || !noChoiceBtn) return;
+
+    const yesScale = Math.min(1 + noClicksForCurrentStep * 0.14, 1.85);
+    const noScale = Math.max(1 - noClicksForCurrentStep * 0.16, 0.3);
+
+    yesChoiceBtn.style.transform = `translate(0px, 0px) scale(${yesScale})`;
+    noChoiceBtn.style.transform = `translate(${noButtonOffsetX}px, ${noButtonOffsetY}px) scale(${noScale})`;
+    noChoiceBtn.style.opacity = String(Math.max(1 - noClicksForCurrentStep * 0.18, 0.05));
+
+    if (noClicksForCurrentStep >= 5) {
+        noChoiceBtn.style.transform = '';
+        noChoiceBtn.classList.add('hidden');
+    }
+}
+
+function resetChoiceButtons() {
+    if (!yesChoiceBtn || !noChoiceBtn) return;
+
+    noClicksForCurrentStep = 0;
+    noButtonOffsetX = 0;
+    noButtonOffsetY = 0;
+    yesChoiceBtn.style.transform = 'translate(0px, 0px) scale(1)';
+    noChoiceBtn.style.transform = 'translate(0px, 0px) scale(1)';
+    noChoiceBtn.style.opacity = '1';
+    noChoiceBtn.classList.remove('hidden');
+}
+
+function openChoiceLayer() {
+    if (!choiceLayer || !choiceQuestionText) return;
+    choiceQuestionText.textContent = interactionQuestions[currentQuestionStep];
+    
+    // Update button text based on current question
+    const answers = interactionAnswers[currentQuestionStep];
+    if (yesChoiceBtn) yesChoiceBtn.textContent = answers.yes;
+    if (noChoiceBtn) noChoiceBtn.textContent = answers.no;
+    
+    choiceLayer.classList.add('active');
+    choiceLayer.setAttribute('aria-hidden', 'false');
+    resetChoiceButtons();
+}
+
+function closeChoiceLayer() {
+    if (!choiceLayer) return;
+    choiceLayer.classList.remove('active');
+    choiceLayer.setAttribute('aria-hidden', 'true');
+}
+
+function createChoiceSparkles(button) {
+    createSparkles(button);
+    const extra = 4;
+    for (let i = 0; i < extra; i++) {
+        setTimeout(() => {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'sparkle sparkle-choice';
+            const size = Math.random() * 4 + 4;
+            sparkle.style.width = `${size}px`;
+            sparkle.style.height = `${size}px`;
+            sparkle.style.left = `${Math.random() * button.offsetWidth}px`;
+            sparkle.style.top = `${Math.random() * button.offsetHeight}px`;
+            sparkle.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+            sparkle.style.boxShadow = '0 0 10px rgba(255, 255, 255, 0.9)';
+            button.appendChild(sparkle);
+            setTimeout(() => sparkle.remove(), SPARKLE_DURATION);
+        }, i * 60);
+    }
+}
+
+function createHeartBurst(container, count = 18) {
+    if (!container) return;
+
+    for (let i = 0; i < count; i++) {
+        const heart = document.createElement('span');
+        heart.className = 'heart-particle';
+        heart.textContent = Math.random() > 0.35 ? '❤' : '✨';
+
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 50 + Math.random() * 100;
+        const tx = Math.cos(angle) * distance;
+        const ty = Math.sin(angle) * distance - 40;
+        const rot = `${(Math.random() - 0.5) * 90}deg`;
+
+        heart.style.setProperty('--tx', `${tx}px`);
+        heart.style.setProperty('--ty', `${ty}px`);
+        heart.style.setProperty('--rot', rot);
+        heart.style.color = Math.random() > 0.5 ? '#ff9fc2' : '#ffffff';
+        heart.style.left = `${45 + Math.random() * 10}%`;
+        heart.style.top = `${40 + Math.random() * 20}%`;
+
+        container.appendChild(heart);
+        setTimeout(() => heart.remove(), 1300);
+    }
+}
+
+function createConfetti(count = 100) {
+    const colors = ['#ff6b9d', '#c44569', '#ffa502', '#ffdd59', '#48dbfb', '#0abde3', '#ee5a6f', '#ff9ff3'];
+    
+    // Reduce confetti on mobile for better performance
+    const adjustedCount = isMobile ? Math.floor(count * 0.6) : count;
+    
+    for (let i = 0; i < adjustedCount; i++) {
+        setTimeout(() => {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            
+            // Random position across the width
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.top = '-10vh';
+            
+            // Random color
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            // Random size
+            const size = Math.random() * 8 + 5;
+            confetti.style.width = size + 'px';
+            confetti.style.height = size + 'px';
+            
+            // Random shape (circle or square)
+            if (Math.random() > 0.5) {
+                confetti.style.borderRadius = '50%';
+            }
+            
+            // Random animation properties
+            const duration = Math.random() * 2 + 2; // 2-4 seconds
+            const drift = (Math.random() - 0.5) * 200; // -100px to 100px horizontal drift
+            const rotation = Math.random() * 720 - 360; // -360deg to 360deg
+            
+            confetti.style.setProperty('--duration', `${duration}s`);
+            confetti.style.setProperty('--drift', `${drift}px`);
+            confetti.style.setProperty('--rotation', `${rotation}deg`);
+            
+            document.body.appendChild(confetti);
+            
+            // Remove after animation
+            setTimeout(() => confetti.remove(), duration * 1000);
+        }, i * 20); // Stagger creation
+    }
+}
+
+function finishInteractionFlow() {
+    closeChoiceLayer();
+    if (openQuestionFlowBtn) {
+        openQuestionFlowBtn.classList.add('hide');
+    }
+
+    if (finalThanks) {
+        finalThanks.textContent = 'Thank you for being in my life';
+        finalThanks.classList.add('visible');
+        
+        // Heart bursts
+        createHeartBurst(finalThanks, 22);
+        setTimeout(() => createHeartBurst(finalThanks, 14), 600);
+        setTimeout(() => createHeartBurst(finalThanks, 14), 1250);
+        
+        // Confetti celebration!
+        createConfetti(120);
+        setTimeout(() => createConfetti(80), 800);
+    }
+}
+
+function initFinalInteractionFlow() {
+    if (!openQuestionFlowBtn || !choiceLayer || !yesChoiceBtn || !noChoiceBtn) {
+        return;
+    }
+
+    openQuestionFlowBtn.addEventListener('click', () => {
+        currentQuestionStep = 0;
+        openChoiceLayer();
+    });
+
+    noChoiceBtn.addEventListener('click', () => {
+        createChoiceSparkles(noChoiceBtn);
+        noClicksForCurrentStep += 1;
+        applyChoiceButtonScale();
+
+        if (noClicksForCurrentStep < 5) {
+            evadeNoButton();
+        }
+    });
+
+    noChoiceBtn.addEventListener('mouseenter', () => {
+        evadeNoButton();
+    });
+
+    yesChoiceBtn.addEventListener('click', () => {
+        createChoiceSparkles(yesChoiceBtn);
+
+        if (currentQuestionStep === 0) {
+            currentQuestionStep = 1;
+            choiceQuestionText.textContent = interactionQuestions[currentQuestionStep];
+            
+            // Update button text for second question
+            const answers = interactionAnswers[currentQuestionStep];
+            yesChoiceBtn.textContent = answers.yes;
+            noChoiceBtn.textContent = answers.no;
+            
+            resetChoiceButtons();
+            return;
+        }
+
+        finishInteractionFlow();
+    });
+
+    choiceLayer.addEventListener('click', (event) => {
+        if (event.target === choiceLayer) {
+            closeChoiceLayer();
+        }
+    });
+
+    choiceLayer.addEventListener('mousemove', (event) => {
+        if (!choiceLayer.classList.contains('active') || noClicksForCurrentStep >= 5) {
+            return;
+        }
+
+        const rect = noChoiceBtn.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const distance = Math.hypot(event.clientX - centerX, event.clientY - centerY);
+
+        if (distance < 90) {
+            evadeNoButton();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && choiceLayer.classList.contains('active')) {
+            closeChoiceLayer();
+        }
+    });
+}
+
+/* ========================================
    INTERSECTION OBSERVER FOR REVEAL ANIMATIONS
    ========================================
    Supports multiple animation types:
@@ -513,7 +840,7 @@ const revealObserver = new IntersectionObserver((entries, observer) => {
 });
 
 // Observe all elements with reveal animation classes
-const revealElements = document.querySelectorAll('.fade-in, .reveal-text, .reveal-slide-left, .reveal-drop, .reveal-delayed, .reveal-letter-content, .reveal-stage-2, .reveal-stage-3');
+const revealElements = document.querySelectorAll('.fade-in, .reveal-text, .reveal-slide-left, .reveal-drop, .reveal-delayed, .reveal-letter-content, .reveal-stage-2, .reveal-stage-3, .reveal-line');
 revealElements.forEach(element => {
     revealObserver.observe(element);
 });
@@ -556,14 +883,20 @@ if (!('scrollBehavior' in document.documentElement.style)) {
    INITIALIZATION
    ======================================== */
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('💕 Romantic Greeting Card Website Loaded');
-    console.log('Click the envelope to begin the experience!');
-
     // Initialize light/dark theme based on user preference
     initThemeToggle();
+
+    // Initialize playful yes/no final interaction flow
+    initFinalInteractionFlow();
     
     // Initialize scroll progress bar
     updateScrollProgress();
+    
+    // Disable custom cursor and flower trail on mobile devices
+    if (isMobile) {
+        document.body.style.cursor = 'auto';
+        // Flower trail will be disabled via the event listener check
+    }
 });
 
 /* ========================================
@@ -768,4 +1101,46 @@ function stopFloatingHearts() {
         cancelAnimationFrame(animationFrameId);
         animationFrameId = null;
     }
+}
+
+/* ========================================
+   FLOWER TRAIL CURSOR EFFECT
+   ======================================== */
+const flowers = ['🌸', '🌼', '🌺', '🌷', '🌹'];
+let lastFlowerTime = 0;
+const FLOWER_INTERVAL = 50; // milliseconds between particles
+const MAX_FLOWER_PARTICLES = 30; // Limit concurrent particles for performance
+let activeFlowerCount = 0;
+
+document.addEventListener('mousemove', (e) => {
+    // Skip on mobile devices for better performance
+    if (isMobile) return;
+    
+    const now = Date.now();
+    
+    // Create flower particle every 50ms and limit max particles
+    if (now - lastFlowerTime > FLOWER_INTERVAL && activeFlowerCount < MAX_FLOWER_PARTICLES) {
+        createFlowerTrail(e.clientX, e.clientY);
+        lastFlowerTime = now;
+    }
+});
+
+function createFlowerTrail(x, y) {
+    const flower = document.createElement('div');
+    flower.className = 'flower-trail';
+    flower.textContent = flowers[Math.floor(Math.random() * flowers.length)];
+    
+    // Random horizontal offset for spread effect
+    const offsetX = (Math.random() - 0.5) * 20;
+    flower.style.left = (x + offsetX) + 'px';
+    flower.style.top = y + 'px';
+    
+    activeFlowerCount++;
+    document.body.appendChild(flower);
+    
+    // Remove element after animation completes
+    setTimeout(() => {
+        flower.remove();
+        activeFlowerCount--;
+    }, 1200); // Match animation duration
 }
